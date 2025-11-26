@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
-
 public class UsuarioDonador {
    
     // Atributos
@@ -70,7 +69,7 @@ public class UsuarioDonador {
         return ubicacion;
     }
 
-    public void setUbicacionTexto(String ubicacionTexto) {
+    public void setUbicacionTexto(String ubicacion) {
         this.ubicacion = ubicacion;
     }
 
@@ -161,12 +160,12 @@ public class UsuarioDonador {
         System.out.println("Usuario " + nombre + " marcado como eliminado.");
     }
 
-    public List<Fundacion> verListadoFundaciones(String filtros) {
+    public List<Fundación> verListadoFundaciones(String filtros) {
         System.out.println("Fundaciones con los filtros: " + filtros);
         return new ArrayList<>();//Regresa una nueva lista vacia en lo que implementamos las fundaciones o la Base de datos
     }
 
-    public List<Fundacion> verListadoSolicitudes() {
+    public List<Solicitud> verListadoSolicitudes() {
         System.out.println("Solicitudes para el usuario " + nombre);
         return new ArrayList<>();
     }
@@ -176,7 +175,7 @@ public class UsuarioDonador {
         return new ArrayList<>();//Regresa tambien una nueva lista vacia
     }
 
-    public Mensaje enviarMensaje(Fundacion fundacion, String texto) {//Regresa un objeto Mensaje
+    public Mensaje enviarMensaje(Fundación fundacion, String texto) {//Regresa un objeto Mensaje
         if (fundacion == null) return null;//Si es null no se manda nada
 
         Mensaje mensaje = new Mensaje();//nuevo objeto Mensaje, pero aun no tiene contenido
@@ -184,12 +183,13 @@ public class UsuarioDonador {
         mensaje.setFechaEnvio(new Date());//Crea la fecha con la fecha actual
         mensaje.setRemitenteDonador(this);//this es el UsuarioDonador que esta realizando este metodo
         mensaje.setDestinatarioFundacion(fundacion);
+        mensaje.setLeido(false);//el mensaje se marca como no leido
 
         System.out.println("Mensaje enviado a fundacion " + fundacion.getNombre());
         return mensaje;
     }
 
-    public Retroalimentacion dejarRetroalimentacion(Fundacion fundacion, Donacion donacion, int calificacion,String comentario) {
+    public Retroalimentacion dejarRetroalimentacion(Fundación fundacion, Donacion donacion, int calificacion,String comentario) {
         if (fundacion == null) return null;//Si es null o se manda nada
 
         Retroalimentacion r = new Retroalimentacion();//nuevo objeto Retroalimentacion, pero aun está vacia
