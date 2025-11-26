@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class UsuarioDonador {
-   
     // Atributos
     private int idUsuario;
     private String nombre;

@@ -1,9 +1,9 @@
-
 package proyectopoo;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Fundacion {
+public class Fundación {
     private int idFundacion;
     private String nombre;
     private String rfc;
@@ -16,7 +16,7 @@ public class Fundacion {
     private String estadoCuenta;
     private Date fechaRegistro;
 
-    public Fundacion(int idFundacion, String nombre, String rfc, String direccion, String categoria, String correoContacto, String telefonoContacto, String documentacionLegal, boolean verificado, String estadoCuenta, Date fechaRegistro) {
+    public Fundación(int idFundacion, String nombre, String rfc, String direccion, String categoria, String correoContacto, String telefonoContacto, String documentacionLegal, boolean verificado, String estadoCuenta, Date fechaRegistro) {
         this.idFundacion = idFundacion;
         this.nombre = nombre;
         this.rfc = rfc;
@@ -130,7 +130,7 @@ public class Fundacion {
         System.out.println("Fundacion " + nombre + " registrada");
     }
 
-    public void editarPerfil(Fundacion datosActualizados) {
+    public void editarPerfil(Fundación datosActualizados) {
         if (datosActualizados == null) return;//Si no mandan nada se sale del metodo
 
         if (datosActualizados.getNombre() != null) {//Si si hay informacion se actualiza
@@ -194,9 +194,10 @@ public class Fundacion {
         respuestaMensaje.setFechaEnvio(new Date());//Crea la fecha con la fecha actual
         respuestaMensaje.setRemitenteFundacion(this);//this es el Fundacion que esta realizando este metodo
         respuestaMensaje.setDestinatarioDonador(mensaje.getRemitenteDonador());//Dice de que donador viene y va el mensaje
+        respuestaMensaje.setLeido(false);//Marca que no sse ha leido
+
 
         System.out.println("Fundacion " + nombre + " respondio mensaje.");
-        return respuestaMensaje;//
-    }
-    
+        return respuestaMensaje;
+    } 
 }
