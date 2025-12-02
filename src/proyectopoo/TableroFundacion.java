@@ -30,8 +30,7 @@ public class TableroFundacion extends javax.swing.JFrame {
         javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
         
-        // Usamos tu método getSolicitudesDeFundacion
-        for (Solicitud s : sistema.getSolicitudesDeFundacion(fundacion)) {
+        for (Solicitud s : sistema.getSolicitudesDeFundacion(fundacion)) { //obtiene solicitudes
             modelo.addRow(new Object[]{
                 s.getIdSolicitud(),
                 s.getTitulo(),
@@ -66,7 +65,20 @@ public class TableroFundacion extends javax.swing.JFrame {
             new String [] {
                 "ID", "Título", "Estado"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         btnCerrarSesion.setText("Cerrar sesión");
@@ -121,11 +133,24 @@ public class TableroFundacion extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     private void btnCrearSolicitudActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearSolicitudActionPerformed
-        // Abrimos la ventana de crear y LE PASAMOS "this" (esta ventana)
-        // para poder refrescar la tabla cuando se guarde.
+        //se crea o se abre el frame de crear solicitud
         CrearSolicitudFrame crear = new CrearSolicitudFrame(sistema, fundacion, this);
         crear.setVisible(true);
     }//GEN-LAST:event_btnCrearSolicitudActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        int filaSeleccionada = jTable1.getSelectedRow();//para saber en qué fila se dio clic
+        //PROBAR EL METODO EN EL USER, INSTANCIAR USUARIOS MAS FACILES PARA ENTRAR
+        if (filaSeleccionada == -1) { //pues si no hay, no hay
+            return;
+        }
+
+        java.util.List<Solicitud> lista = sistema.getSolicitudesActivas();
+        Solicitud solicitudSeleccionada = lista.get(filaSeleccionada);
+
+        DetalleSolicitudFrame detalle = new DetalleSolicitudFrame(solicitudSeleccionada);
+        detalle.setVisible(true);
+    }//GEN-LAST:event_jTable1MouseClicked
 
     /**
      * @param args the command line arguments

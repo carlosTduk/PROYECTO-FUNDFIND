@@ -145,12 +145,18 @@ public class FundFindSistema {//Esta clase guarda todos los usuarios, fundaacion
 
         UsuarioDonador u2 = new UsuarioDonador(2, "Carlos", "carlosserna@gmail.com", "abcdef", "Zapopan, JAL", 20.70, -103.40, intereses2,"ACTIVA",new Date());
         usuarios.add(u2);
+        
+        UsuarioDonador u3 = new UsuarioDonador(3, "utest", "utest", "1234", "ddd, ddd", 20.70, -103.40, intereses2,"ACTIVA",new Date());
+        usuarios.add(u3);
 
         Fundación f1 = new Fundación(1,"Fundacion Sonrisas", "FSR010101ABC", "Guadalajara, JAL", "Niños", "contacto@sonrisas.org", "3330000000", "Acta Constitutiva", true, "ACTIVA", new Date());
 
         Fundación f2 = new Fundación(2, "Fundacion Patitas", "PAT020202DEF", "Zapopan, JAL", "Animales", "info@patitas.org", "3331111111", "Documento Legal", true, "ACTIVA", new Date() );
+        
+        Fundación f3 = new Fundación(3, "testf", "12345", "aaaa", "aaa", "testf", "aaaa", "aaa", true, "ACTIVA", new Date());
 
         fundaciones.add(f1);
         fundaciones.add(f2);
+        fundaciones.add(f3);
     }
 }

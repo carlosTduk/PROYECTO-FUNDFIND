@@ -19,13 +19,13 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
     /**
      * Creates new form CrearSolicitudFrame
      */
-    // Constructor especial
+    
     public CrearSolicitudFrame(FundFindSistema sys, Fundación fun, TableroFundacion padre) {
         initComponents();
         this.sistema = sys;
         this.fundacion = fun;
         this.ventanaPadre = padre;
-        this.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE); //Solo cerrar esta ventana
+        this.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE); //solo cerrar esta ventana
         this.setLocationRelativeTo(null);
     }
 
@@ -40,14 +40,14 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
 
         txtTitulo = new javax.swing.JTextField();
         txtDesc = new javax.swing.JTextField();
-        txtTipo = new javax.swing.JTextField();
-        txtCausa = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         btnPublicar = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
+        cmbTipo = new javax.swing.JComboBox<>();
+        cmbMotivo = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -63,19 +63,13 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
             }
         });
 
-        txtTipo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtTipoActionPerformed(evt);
-            }
-        });
-
         jLabel1.setText("Título");
 
         jLabel2.setText("Descripción");
 
         jLabel3.setText("Tipo");
 
-        jLabel4.setText("Causa");
+        jLabel4.setText("Motivo");
 
         btnPublicar.setText("Publicar");
         btnPublicar.addActionListener(new java.awt.event.ActionListener() {
@@ -84,57 +78,70 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel5.setFont(new java.awt.Font("Dubai", 0, 24)); // NOI18N
         jLabel5.setText("Crear solicitud");
+
+        cmbTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "...", "Ropa", "Alimentos", "Dinero", "Juguetes", "Medicamentos", "Voluntariado" }));
+        cmbTipo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbTipoActionPerformed(evt);
+            }
+        });
+
+        cmbMotivo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "...", "Niños", "Adultos Mayores", "Animales", "Desastres Naturales", "Educación", "Salud" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(78, 78, 78)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(78, 78, 78)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtTipo)
-                                .addComponent(txtCausa, javax.swing.GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE))
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(189, 189, 189)
                                 .addComponent(btnPublicar))
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(txtTitulo, javax.swing.GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
                                 .addComponent(txtDesc))
-                            .addComponent(jLabel2)))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(259, 259, 259)
-                        .addComponent(jLabel5)))
-                .addContainerGap(84, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(cmbMotivo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbTipo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(255, 255, 255)
+                .addComponent(jLabel5)
+                .addGap(0, 206, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(36, 36, 36)
+                .addGap(43, 43, 43)
                 .addComponent(jLabel5)
-                .addGap(55, 55, 55)
+                .addGap(60, 60, 60)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel2)
-                .addGap(9, 9, 9)
-                .addComponent(txtDesc, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(7, 7, 7)
+                .addComponent(cmbTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
-                .addGap(8, 8, 8)
-                .addComponent(txtCausa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(64, 64, 64)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbMotivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addGap(11, 11, 11)
+                .addComponent(txtDesc, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnPublicar)
                 .addGap(38, 38, 38))
         );
@@ -153,8 +160,8 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
     private void btnPublicarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPublicarActionPerformed
         String titulo = txtTitulo.getText();
         String desc = txtDesc.getText();
-        String tipo = txtTipo.getText();
-        String causa = txtCausa.getText();
+        String tipo = cmbTipo.getSelectedItem().toString();
+        String causa = cmbMotivo.getSelectedItem().toString();
 
         if(titulo.isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Escribe un título");
@@ -168,24 +175,24 @@ public class CrearSolicitudFrame extends javax.swing.JFrame {
         //refrescamos la tabla de la ventana de atrás
         ventanaPadre.llenarTablaMisSolicitudes();  
         
-        this.dispose(); //Cerrar formulario
+        this.dispose(); //cerrar
     }//GEN-LAST:event_btnPublicarActionPerformed
 
-    private void txtTipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTipoActionPerformed
+    private void cmbTipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTipoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtTipoActionPerformed
+    }//GEN-LAST:event_cmbTipoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnPublicar;
+    private javax.swing.JComboBox<String> cmbMotivo;
+    private javax.swing.JComboBox<String> cmbTipo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JTextField txtCausa;
     private javax.swing.JTextField txtDesc;
-    private javax.swing.JTextField txtTipo;
     private javax.swing.JTextField txtTitulo;
     // End of variables declaration//GEN-END:variables
 }

@@ -31,13 +31,13 @@ public class TableroDonador extends javax.swing.JFrame {
     
     private void llenarTabla() {
         javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
-        modelo.setRowCount(0); // Limpiar tabla
+        modelo.setRowCount(0); //limpiar tabla
         
-        // Usamos tu método getSolicitudesActivas()
-        for (Solicitud s : sistema.getSolicitudesActivas()) {
+        
+        for (Solicitud s : sistema.getSolicitudesActivas()) {//obtiene las solicitudes
             modelo.addRow(new Object[]{
                 s.getTitulo(),
-                s.getFundacion().getNombre(), // Obtenemos nombre de la fundación
+                s.getFundacion().getNombre(), //obtiene nombre de la fundación
                 s.getCausaSocial(),
                 s.getTipoDonacion()
             });
@@ -96,21 +96,21 @@ public class TableroDonador extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(208, 208, 208)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(212, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(695, Short.MAX_VALUE)
                 .addComponent(btnSalir)
                 .addGap(105, 105, 105))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 749, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(28, 28, 28)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnSalir)
                 .addGap(26, 26, 26))
         );
