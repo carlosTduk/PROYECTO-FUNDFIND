@@ -1,0 +1,1 @@
+Dentro de esta Carpeta se encontrara la adaptación a Android Studio
