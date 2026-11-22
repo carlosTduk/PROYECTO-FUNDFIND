@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.FundFind" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.FundFind.Legacy" parent="Base.Theme.FundFind" />
+    <!-- Base application theme. -->
+    <style name="Base.Theme.FundFind" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
 </resources>

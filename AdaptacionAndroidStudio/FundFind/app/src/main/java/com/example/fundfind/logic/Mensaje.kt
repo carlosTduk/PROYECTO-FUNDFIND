@@ -2,7 +2,7 @@ package com.example.fundfind.logic
 
 import java.util.Date
 
-class Mensaje {
+class Mensaje : java.io.Serializable {
     // Getters y setters
     var idMensaje: Int = 0
     @JvmField

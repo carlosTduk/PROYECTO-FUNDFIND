@@ -14,7 +14,9 @@ class UsuarioDonador(
     var intereses: MutableList<String?>?,
     var estadoCuenta: String?,
     var fechaRegistro: Date?
-) {
+) : java.io.Serializable {
+    internal var sistema: FundFindSistema? = null
+    val favoritos: MutableSet<Int> = linkedSetOf()
     // Métodos
     fun registrar() {
         if (this.fechaRegistro == null) {
@@ -29,7 +31,7 @@ class UsuarioDonador(
         contrasena: String?
     ): Boolean {
         val datosCorrectos =
-            this.correo != null && this.correo == correo && this.contrasena != null && this.contrasena == contrasena
+            this.correo != null && this.correo == correo && this.contrasena != null && Credenciales.coincide(contrasena.orEmpty(), this.contrasena.orEmpty())
 
         val cuentaActiva = "ACTIVA" == this.estadoCuenta
 
@@ -69,17 +71,19 @@ class UsuarioDonador(
 
     fun verListadoFundaciones(filtros: String?): MutableList<Fundacion?> {
         println("Fundaciones con los filtros: " + filtros)
-        return ArrayList<Fundacion?>()
+        return sistema?.fundaciones?.filter { it.estadoCuenta == "ACTIVA" &&
+            (filtros.isNullOrBlank() || "${it.nombre} ${it.categoria} ${it.direccion}".contains(filtros, true))
+        }?.toMutableList() ?: mutableListOf()
     }
 
     fun verListadoSolicitudes(): MutableList<Solicitud?> {
         println("Solicitudes para el usuario " + nombre)
-        return ArrayList<Solicitud?>()
+        return sistema?.solicitudesActivas ?: mutableListOf()
     }
 
     fun verNotificaciones(): MutableList<Notificacion?> {
         println("Notificaciones del usuario " + nombre)
-        return ArrayList<Notificacion?>()
+        return sistema?.notificaciones?.filter { it.receptorUsuario === this }?.toMutableList() ?: mutableListOf()
     }
 
     fun enviarMensaje(fundacion: Fundacion?, texto: String?): Mensaje? {
@@ -104,6 +108,7 @@ class UsuarioDonador(
     ): Retroalimentacion? {
         if (fundacion == null) return null
 
+        require(calificacion in 1..5) { "La calificación debe estar entre 1 y 5." }
         val r = Retroalimentacion()
         r.fundacion = fundacion // Se corrigió el set viejo de Java por asignación nativa de Kotlin
         r.usuario = this
