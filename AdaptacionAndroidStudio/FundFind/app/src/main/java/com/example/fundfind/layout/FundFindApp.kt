@@ -74,7 +74,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable fun Cabecera(e: EstadoApp, titulo: String, dark: Boolean = e.version == 2, volver: Boolean = true) {
     Row(Modifier.fillMaxWidth().background(if(dark) Bosque else Fondo).padding(horizontal=8.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically) {
-        if(volver) BotonIcono("atras","Volver",if(dark) Color.White else Bosque) {e.atras()}
+        if(volver) BotonIcono("atras","Volver",if(dark) Menta else VerdeAccion) {e.atras()}
         Text(titulo,color=if(dark) Color.White else Bosque,fontSize=16.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f))
     }
 }
@@ -103,7 +103,7 @@ import androidx.compose.ui.unit.sp
                 e.ir(route)
             },horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center) {
                 Box(Modifier.background(if(selected&&e.version==1) Verde else Color.Transparent,androidx.compose.foundation.shape.CircleShape).padding(horizontal=10.dp,vertical=2.dp)) {
-                    Icono(icon,Modifier.size(21.dp),if(selected) Bosque else Gris)
+                    Icono(icon,Modifier.size(21.dp),if(selected) VerdeAccion else VerdeSuave)
                 }
                 Text(name,fontSize=9.sp,color=if(selected)Bosque else Gris,maxLines=1)
             }

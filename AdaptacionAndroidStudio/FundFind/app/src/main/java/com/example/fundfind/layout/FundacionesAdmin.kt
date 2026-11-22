@@ -28,7 +28,7 @@ import java.time.format.ResolverStyle
         Row(Modifier.fillMaxWidth().background(Bosque).padding(20.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
             Avatar(f?.nombre.orEmpty())
             Column(Modifier.weight(1f)){Text(f?.nombre.orEmpty(),color=Color.White,fontWeight=FontWeight.Bold,fontSize=15.sp);Nota(if(f?.isVerificado==true)"Organización verificada"else"Pendiente de verificación",Verde)}
-            BotonIcono("avisos","Notificaciones de la fundación",Color.White){e.ir(Rutas.AVISOS)}
+            BotonIcono("avisos","Notificaciones de la fundación",Menta){e.ir(Rutas.AVISOS)}
         }
         Box(Modifier.weight(1f)){Pagina(e,nav=true) {
             Titulo("Resumen de tu fundación")
@@ -84,7 +84,7 @@ import java.time.format.ResolverStyle
     Pagina(e,if(original==null)"Nueva solicitud"else"Editar solicitud",footer={
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             Accion(if(original?.activa()==true)"Guardar cambios"else"Guardar borrador",false,Modifier.weight(1f)){guardar(false)}
-            Accion("Publicar solicitud",true,Modifier.weight(1f)){guardar(true)}
+            Accion("Publicar solicitud",true,Modifier.weight(1f), confirmacion="¿Deseas publicar esta solicitud?"){guardar(true)}
         }
     }) {
         Campo("Título",titulo,"Ej. Despensas para 120 familias",{titulo=it})
@@ -141,7 +141,7 @@ import java.time.format.ResolverStyle
     Pagina(e,"Verificar fundación",footer=if(f!=null){{
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             Accion("Rechazar",false,Modifier.weight(1f)){rechazar=true}
-            Accion("Aprobar",true,Modifier.weight(1f)){if(e.cambiar{check(e.invitado&&e.rol=="admin");e.sistema.verificar(f,true,"Administrador invitado")})e.ir(Rutas.V2_ADMIN)}
+            Accion("Aprobar",true,Modifier.weight(1f), confirmacion="¿Deseas aprobar la verificación de ${f.nombre}?"){if(e.cambiar{check(e.invitado&&e.rol=="admin");e.sistema.verificar(f,true,"Administrador invitado")})e.ir(Rutas.V2_ADMIN)}
         }
     }}else null) {
         if(f==null)Aviso("No hay fundaciones pendientes de revisión.")else {
@@ -168,7 +168,7 @@ import java.time.format.ResolverStyle
             Text(s.titulo.orEmpty(),fontSize=14.sp,fontWeight=FontWeight.SemiBold);Nota("${s.reportes} reportes · ${s.fundacion?.nombre}");Etiqueta(s.motivoReporte,Melocoton)
             Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                 Accion("Revisar",false,Modifier.weight(1f)){e.ver(s)}
-                Accion("Aprobar",true,Modifier.weight(1f)){e.cambiar{check(e.invitado&&e.rol=="admin");e.sistema.moderar(s,true)}}
+                Accion("Aprobar",true,Modifier.weight(1f), confirmacion="¿Deseas aprobar esta publicación?"){e.cambiar{check(e.invitado&&e.rol=="admin");e.sistema.moderar(s,true)}}
                 Accion("Eliminar",false,Modifier.weight(1f)){retirar=s}
             }
         }}

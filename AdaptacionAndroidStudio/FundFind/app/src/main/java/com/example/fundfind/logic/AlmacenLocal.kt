@@ -6,11 +6,15 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.File
 
-/** Local-only storage. Guest data is a separate in-memory graph and is never persisted. */
-class AlmacenLocal(context: Context) {
+/** Conserva las cuentas existentes y guarda el recorrido invitado en su propia base SQLite. */
+class AlmacenLocal(context: Context, private val baseInvitado: BaseDatosInvitado = BaseDatosInvitado(context)) {
     private val archivo = AtomicFile(File(context.filesDir, "fundfind-v1.bin"))
     var errorCarga: String? = null
         private set
+
+    fun cargarInvitado(): FundFindSistema = baseInvitado.cargar() ?: DatosRecorrido.crear()
+
+    fun guardarInvitado(sistema: FundFindSistema) = baseInvitado.guardar(sistema)
 
     fun cargar(): FundFindSistema {
         if (!archivo.baseFile.exists()) return FundFindSistema()

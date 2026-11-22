@@ -4,12 +4,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val Bosque = Color(0xFF143E36)
+val VerdeAccion = Color(0xFF237A50)
+val VerdeSuave = Color(0xFF577568)
 val Verde = Color(0xFFB9DF42)
 val Fondo = Color(0xFFFAF9F3)
 val Menta = Color(0xFFE3F1E8)
@@ -41,8 +45,10 @@ val Terracota = Color(0xFFAB593B)
 
 @Composable
 fun TemaFundFind(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = lightColorScheme(primary = Bosque, onPrimary = Color.White,
+    MaterialTheme(colorScheme = lightColorScheme(primary = VerdeAccion, onPrimary = Color.White,
         secondary = Verde, background = Fondo, surface = Fondo, onSurface = Bosque,
+        primaryContainer = Menta, onPrimaryContainer = Bosque,
+        secondaryContainer = Menta, onSecondaryContainer = Bosque,
         surfaceVariant = Menta, outline = Borde, error = Terracota),
         typography = Typography(bodyLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
             bodyMedium = TextStyle(fontSize = 12.sp, lineHeight = 17.sp),
@@ -59,16 +65,32 @@ fun TemaFundFind(content: @Composable () -> Unit) {
         textAlign = if (centro) TextAlign.Center else TextAlign.Start,
         modifier = if (centro) Modifier.fillMaxWidth() else Modifier)
 }
-@Composable fun Accion(text: String, principal: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(onClick = onClick, modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
-        shape = RoundedCornerShape(12.dp), border = if (principal) null else androidx.compose.foundation.BorderStroke(1.dp, Borde),
-        colors = ButtonDefaults.buttonColors(containerColor = if (principal) Verde else Color.White, contentColor = Bosque),
+@Composable fun Accion(text: String, principal: Boolean = true, modifier: Modifier = Modifier, confirmacion: String? = null, onClick: () -> Unit) {
+    var pendiente by rememberSaveable { mutableStateOf(false) }
+    if (pendiente && confirmacion != null) ConfirmarAccion(text, confirmacion, { pendiente = false }) { pendiente = false; onClick() }
+    Button(onClick = { if (confirmacion == null) onClick() else pendiente = true }, modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
+        shape = RoundedCornerShape(12.dp), border = if (principal) null else androidx.compose.foundation.BorderStroke(1.dp, VerdeAccion),
+        colors = ButtonDefaults.buttonColors(containerColor = if (principal) VerdeAccion else Color.White, contentColor = if (principal) Color.White else VerdeAccion),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)) {
         Text(text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
     }
 }
-@Composable fun Enlace(text: String, onClick: () -> Unit) {
-    TextButton(onClick = onClick, contentPadding = PaddingValues(0.dp)) { Text(text, fontSize = 12.sp, color = Bosque) }
+@Composable fun Enlace(text: String, confirmacion: String? = null, onClick: () -> Unit) {
+    var pendiente by rememberSaveable { mutableStateOf(false) }
+    if (pendiente && confirmacion != null) ConfirmarAccion(text, confirmacion, { pendiente = false }) { pendiente = false; onClick() }
+    TextButton(onClick = { if (confirmacion == null) onClick() else pendiente = true }, contentPadding = PaddingValues(0.dp)) {
+        Text(text, fontSize = 12.sp, color = VerdeAccion)
+    }
+}
+
+@Composable private fun ConfirmarAccion(titulo: String, mensaje: String, cancelar: () -> Unit, confirmar: () -> Unit) {
+    AlertDialog(onDismissRequest = cancelar, containerColor = Fondo,
+        titleContentColor = Bosque, textContentColor = Bosque,
+        shape = RoundedCornerShape(16.dp),
+        title = { Text(titulo) },
+        text = { Text(mensaje, modifier = Modifier.heightIn(max = 300.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) },
+        dismissButton = { TextButton(onClick = cancelar) { Text("Cancelar") } },
+        confirmButton = { Button(onClick = confirmar, shape = RoundedCornerShape(12.dp)) { Text("Confirmar") } })
 }
 @Composable fun Campo(label: String, value: String, hint: String, onChange: (String) -> Unit,
                       password: Boolean = false, multiline: Boolean = false, keyboard: KeyboardType = KeyboardType.Text) {
@@ -83,7 +105,7 @@ fun TemaFundFind(content: @Composable () -> Unit) {
             keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboard),
             trailingIcon = if (password) {{ TextButton(onClick = { visible = !visible }) { Text(if (visible) "Ocultar" else "Ver", fontSize = 10.sp) } }} else null,
             colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White,
-                unfocusedBorderColor = Borde, focusedBorderColor = Bosque))
+                unfocusedBorderColor = Borde, focusedBorderColor = VerdeAccion))
     }
 }
 @Composable fun Selector(label: String, value: String, opciones: List<String>, change: (String) -> Unit) {
@@ -129,11 +151,11 @@ fun TemaFundFind(content: @Composable () -> Unit) {
         Text("Find", color = if (claro) Verde else Color(0xFF7C9D2A), fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.offset(x = (-8).dp))
     }
 }
-@Composable fun BotonIcono(icono: String, description: String, color: Color = Bosque, action: () -> Unit) {
+@Composable fun BotonIcono(icono: String, description: String, color: Color = VerdeAccion, action: () -> Unit) {
     IconButton(onClick = action, modifier = Modifier.semantics { contentDescription = description }) { Icono(icono, Modifier.size(22.dp), color) }
 }
 
-@Composable fun Icono(nombre: String, modifier: Modifier = Modifier, color: Color = Bosque) {
+@Composable fun Icono(nombre: String, modifier: Modifier = Modifier, color: Color = VerdeAccion) {
     Canvas(modifier) {
         val sx = size.width / 24; val sy = size.height / 24
         fun path(vararg pts: Pair<Float, Float>, close: Boolean = false) {

@@ -79,11 +79,11 @@ import com.example.fundfind.logic.*
         lista.reversed().forEach{d->
             FilaDonacion(e,d)
             if(fundacion) {Nota("${d.nombreContacto} · ${d.contacto}")
-                if(d.estado=="INTENCIONREGISTRADA")Accion("Confirmar recepción de ${d.cantidadDescripcion}"){e.cambiar{require(d.solicitud?.fundacion===e.fundacion);e.sistema.cambiarDonacion(d,"CONFIRMADA")}}
+                if(d.estado=="INTENCIONREGISTRADA")Accion("Confirmar recepción de ${d.cantidadDescripcion}", confirmacion="¿Confirmas que recibiste ${d.cantidadDescripcion}?"){e.cambiar{require(d.solicitud?.fundacion===e.fundacion);e.sistema.cambiarDonacion(d,"CONFIRMADA")}}
             }
             if(d.idDonacion==e.donacionId||lista.size==1) {
                 Enlace("Ver comprobante"){e.donacionId=d.idDonacion;e.ir(e.destino("CONFIRMACION"))}
-                if(d.estado!="CANCELADA")Enlace("Cancelar intención") {e.cambiar{require(if(fundacion)d.solicitud?.fundacion===e.fundacion else d.usuario===e.usuario);e.sistema.cambiarDonacion(d,"CANCELADA")}}
+                if(d.estado!="CANCELADA")Enlace("Cancelar intención", confirmacion="¿Deseas cancelar esta intención de ayuda?") {e.cambiar{require(if(fundacion)d.solicitud?.fundacion===e.fundacion else d.usuario===e.usuario);e.sistema.cambiarDonacion(d,"CANCELADA")}}
                 if(!fundacion)Enlace("Dejar retroalimentación"){e.fundacionId=requireNotNull(d.solicitud?.fundacion).idFundacion;e.ir(Rutas.RESENAS)}
             }
         }
@@ -102,7 +102,7 @@ import com.example.fundfind.logic.*
             Accion("Ver detalle",false){e.ver(s)}
             if(s.estado!="ELIMINADA") {
                 Enlace("Editar"){e.solicitudId=s.idSolicitud;e.editarSolicitud=true;e.ir(Rutas.V2_CREAR)}
-                if(s.activa())Enlace("Marcar completada"){e.cambiar{require(s.fundacion===e.fundacion);s.marcarCompletada()}}
+                if(s.activa())Enlace("Marcar completada", confirmacion="¿Deseas marcar esta solicitud como completada?"){e.cambiar{require(s.fundacion===e.fundacion);s.marcarCompletada()}}
                 Enlace("Eliminar solicitud"){eliminar=s}
             }
         }}
@@ -147,11 +147,11 @@ import com.example.fundfind.logic.*
         val lista=e.sistema.getRetroalimentacionesParaFundacion(f).filterNotNull()
         if(lista.isEmpty())Nota("Esta fundación aún no tiene reseñas.")
         lista.forEach{r->Tarjeta{Text("${r.usuario?.nombre} · ${r.calificacion}/5",fontWeight=FontWeight.Bold);Text(r.comentario.orEmpty());
-            if(r.usuario===e.usuario)Enlace("Eliminar mi reseña"){e.cambiar{r.eliminar();e.sistema.retroalimentaciones.remove(r)}}
+            if(r.usuario===e.usuario)Enlace("Eliminar mi reseña", confirmacion="¿Deseas eliminar tu reseña? Esta acción no se puede deshacer."){e.cambiar{r.eliminar();e.sistema.retroalimentaciones.remove(r)}}
         }}
         Selector("Calificación",nota,listOf("1","2","3","4","5")){nota=it}
         Campo("Comentario",comentario,"Comparte tu experiencia",{comentario=it},multiline=true)
-        Accion("Publicar retroalimentación") {
+        Accion("Publicar retroalimentación", confirmacion="¿Deseas enviar esta retroalimentación?\n\nCalificación: $nota/5\n$comentario") {
             if(e.cambiar {require(comentario.isNotBlank()){"Escribe un comentario."};requireNotNull(e.sistema.dejarRetroalimentacion(e.usuario,f,nota.toInt(),comentario)){"Ingresa como donador o invitado."}})comentario=""
         }
     }

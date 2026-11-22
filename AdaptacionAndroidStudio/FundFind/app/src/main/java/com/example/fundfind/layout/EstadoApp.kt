@@ -61,11 +61,15 @@ class EstadoApp(private val almacen: AlmacenLocal) {
     }
     fun inicio(): Rutas = when (rol) { "fundacion" -> Rutas.V2_FUNDACION; "admin" -> Rutas.V2_ADMIN; else -> destino("INICIO") }
     fun entrarInvitado() {
-        val recorrido = demo?.takeIf { it.usuarios.first { u -> u.idUsuario == 100 }.estadoCuenta == "ACTIVA" }
-            ?: DatosRecorrido.crear().also { demo = it }
-        datos = recorrido; invitado = true; usuario = recorrido.usuarios.first { it.idUsuario == 100 }
-        fundacion = recorrido.fundaciones.first { it.idFundacion == 100 }; rol = "donador"
-        anteriores.clear(); ir(destino("INICIO"), true)
+        ejecutar {
+            val recorrido = (demo ?: almacen.cargarInvitado())
+                .takeIf { it.usuarios.first { u -> u.idUsuario == 100 }.estadoCuenta == "ACTIVA" }
+                ?: DatosRecorrido.crear()
+            almacen.guardarInvitado(recorrido)
+            demo = recorrido; datos = recorrido; invitado = true; usuario = recorrido.usuarios.first { it.idUsuario == 100 }
+            fundacion = recorrido.fundaciones.first { it.idFundacion == 100 }; rol = "donador"
+            anteriores.clear(); ir(destino("INICIO"), true)
+        }
     }
     fun visitar(pantalla: Rutas) {
         check(invitado)
@@ -101,7 +105,7 @@ class EstadoApp(private val almacen: AlmacenLocal) {
     }
     fun cambiar(accion: () -> Unit): Boolean = ejecutar {
         accion()
-        if (!invitado) almacen.guardar(sistema)
+        if (invitado) almacen.guardarInvitado(sistema) else almacen.guardar(sistema)
     }
     fun limpiarFiltros() { busqueda = ""; filtroUbicacion = ""; filtroCategoria = ""; filtroTipo = ""; filtroCausa = "" }
     fun resultados(): List<Solicitud> {

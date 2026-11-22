@@ -53,7 +53,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
 
 @Composable fun Buscador(e: EstadoApp, cambiarPantalla: Boolean=false) {
     OutlinedTextField(e.busqueda,{e.busqueda=it},modifier=Modifier.fillMaxWidth(),singleLine=true,
-        placeholder={Text("Buscar fundaciones o solicitudes",fontSize=12.sp)},leadingIcon={Icono("buscar",Modifier.size(18.dp),Gris)},
+        placeholder={Text("Buscar fundaciones o solicitudes",fontSize=12.sp)},leadingIcon={Icono("buscar",Modifier.size(18.dp),VerdeSuave)},
         trailingIcon=if(cambiarPantalla){{BotonIcono("explorar","Buscar solicitudes"){e.ir(e.destino("EXPLORAR"))}}}else null,
         shape=RoundedCornerShape(14.dp),colors=OutlinedTextFieldDefaults.colors(unfocusedContainerColor=Color.White,
             focusedContainerColor=Color.White,unfocusedBorderColor=Borde,focusedBorderColor=Bosque),
@@ -66,7 +66,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
         Column(Modifier.fillMaxWidth().background(if(version==2)Bosque else Fondo).padding(16.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Box(Modifier.weight(1f)){Logo(version==2)}
-                BotonIcono("avisos","Notificaciones",if(version==2)Color.White else Bosque){e.ir(Rutas.AVISOS)}
+                BotonIcono("avisos","Notificaciones",if(version==2)Menta else VerdeAccion){e.ir(Rutas.AVISOS)}
                 Box(Modifier.clickable{e.ir(e.destino("PERFIL"))}){Avatar(e.usuario?.nombre.orEmpty(),oscuro=version==1)}
             }
             if(version==2){Spacer(Modifier.height(10.dp));Buscador(e,true)}
@@ -105,7 +105,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
 @Composable fun Explorar(e: EstadoApp,version: Int) {
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxWidth().background(if(version==2)Bosque else Fondo).padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-            Text("Explorar",fontSize=24.sp,fontWeight=FontWeight.Bold,color=if(version==2)Color.White else Bosque)
+            Text("Explorar",fontSize=24.sp,fontWeight=FontWeight.Bold,color=if(version==2)Menta else VerdeAccion)
             Buscador(e)
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
@@ -159,7 +159,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
             Avatar(s.fundacion?.nombre.orEmpty(),oscuro=version==1)
             Column(Modifier.weight(1f)){Text(s.fundacion?.nombre.orEmpty(),fontSize=13.sp,fontWeight=FontWeight.SemiBold);Nota(if(s.fundacion?.isVerificado==true)"Organización verificada" else "Organización pendiente de verificación")}
             BotonIcono("corazon",if(e.usuario?.favoritos?.contains(s.idSolicitud)==true)"Quitar de favoritos" else "Guardar solicitud",
-                if(e.usuario?.favoritos?.contains(s.idSolicitud)==true)Terracota else Gris){e.favorito(s)}
+                if(e.usuario?.favoritos?.contains(s.idSolicitud)==true)VerdeAccion else VerdeSuave){e.favorito(s)}
         }
         Titulo(s.titulo.orEmpty())
         Nota(s.descripcion.orEmpty())
@@ -181,10 +181,10 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
         }
         Aviso("En esta fase no se procesan pagos monetarios reales.",true)
         Row {Enlace("Ver reseñas"){e.fundacionId=requireNotNull(s.fundacion).idFundacion;e.ir(Rutas.RESENAS)}
-            Spacer(Modifier.weight(1f));Enlace("Reportar publicación") {e.cambiar{s.reportes++;s.motivoReporte="Reportada"};e.aviso="Reporte registrado para revisión."}}
+            Spacer(Modifier.weight(1f));Enlace("Reportar publicación", confirmacion="¿Deseas reportar esta publicación para su revisión?") {e.cambiar{s.reportes++;s.motivoReporte="Reportada"};e.aviso="Reporte registrado para revisión."}}
         if(e.rol=="fundacion"&&s.fundacion===e.fundacion) {
             Accion("Editar solicitud",false){e.editarSolicitud=true;e.ir(Rutas.V2_CREAR)}
-            Accion("Marcar completada",false){e.cambiar{s.marcarCompletada()}}
+            Accion("Marcar completada",false, confirmacion="¿Deseas marcar esta solicitud como completada?"){e.cambiar{s.marcarCompletada()}}
         }
     }
 }
@@ -200,7 +200,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
     val confirmar:()->Unit={
         if(e.cambiar{val d=e.sistema.registrarIntencion(requireNotNull(e.usuario),s,tipo,cantidad,nombre,contacto,comprobante);e.donacionId=d.idDonacion})e.ir(e.destino("CONFIRMACION"))
     }
-    Pagina(e,"Quiero ayudar",footer=if(version==1){{Accion("Confirmar intención",onClick=confirmar)}}else null) {
+    Pagina(e,"Quiero ayudar",footer=if(version==1){{Accion("Confirmar intención", confirmacion="¿Deseas confirmar tu ayuda a ${s.fundacion?.nombre}?\n\n$tipo · $cantidad",onClick=confirmar)}}else null) {
         if(version==1)Aviso("${s.titulo}\n${s.fundacion?.nombre}")else Titulo("Registra tu intención de ayuda")
         Nota(if(version==1)"Cuéntanos cómo quieres apoyar" else "Para: ${s.titulo}")
         Selector("Tipo de apoyo que ofreces",tipo,listOf("Comida","Ropa","Útiles escolares","Higiene","Voluntariado","Otro")){tipo=it}
@@ -208,7 +208,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
         Campo("Nombre de contacto",nombre,"Tu nombre completo",{nombre=it})
         Campo("Correo o teléfono",contacto,"nombre@correo.com",{contacto=it})
         if(version==1)Row(verticalAlignment=Alignment.CenterVertically){Checkbox(comprobante,{comprobante=it});Nota("Quiero recibir un comprobante digital")}
-        else {Aviso("Esta fase solo registra tu intención. No se realizan pagos reales.",true);Accion("Confirmar intención",onClick=confirmar)}
+        else {Aviso("Esta fase solo registra tu intención. No se realizan pagos reales.",true);Accion("Confirmar intención", confirmacion="¿Deseas confirmar tu ayuda a ${s.fundacion?.nombre}?\n\n$tipo · $cantidad",onClick=confirmar)}
     }
 }
 
@@ -236,7 +236,7 @@ fun fecha(s: Solicitud): String = s.fechaLimite?.format(DateTimeFormatter.ofPatt
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxWidth().background(if(version==2)Bosque else Fondo).padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)) {
             Avatar(u?.nombre.orEmpty(),true,version==1)
-            Text(u?.nombre.orEmpty(),fontSize=18.sp,fontWeight=FontWeight.Bold,color=if(version==2)Color.White else Bosque)
+            Text(u?.nombre.orEmpty(),fontSize=18.sp,fontWeight=FontWeight.Bold,color=if(version==2)Menta else VerdeAccion)
             Nota(u?.correo.orEmpty(),if(version==2)Menta else Gris)
             Nota(u?.ubicacionTexto.orEmpty(),if(version==2)Menta else Gris)
             if(version==1)Accion("Editar datos personales",false){e.ir(Rutas.EDITAR_PERFIL)}
