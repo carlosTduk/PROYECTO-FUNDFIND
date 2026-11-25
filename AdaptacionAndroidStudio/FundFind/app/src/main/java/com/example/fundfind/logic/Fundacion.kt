@@ -15,7 +15,12 @@ class Fundacion(
     var isVerificado: Boolean,
     var estadoCuenta: String?,
     var fechaRegistro: Date?
-) {
+) : java.io.Serializable {
+    internal var sistema: FundFindSistema? = null
+    var latitud: Double = 4.579
+    var longitud: Double = -74.216
+    var fechaVerificacion: Date? = null
+    var responsableVerificacion: String? = null
     // Métodos
     fun registrar() {
         if (this.fechaRegistro == null) {
@@ -59,16 +64,20 @@ class Fundacion(
 
     fun gestionarSolicitudes(): MutableList<Solicitud?> {
         println("Gestion de Solicitudes de la fundacion " + nombre)
-        return ArrayList<Solicitud?>()
+        return sistema?.getSolicitudesDeFundacion(this) ?: mutableListOf()
     }
 
     fun editarSolicitud(solicitud: Solicitud?) {
         if (solicitud == null) return
+        require(solicitud.fundacion === this) { "La solicitud pertenece a otra fundación." }
+        solicitud.actualizarDatos()
         println("Editando solicitud " + solicitud.titulo + " de la fundacion " + nombre)
     }
 
     fun eliminarSolicitud(solicitud: Solicitud?) {
         if (solicitud == null) return
+        require(solicitud.fundacion === this) { "La solicitud pertenece a otra fundación." }
+        solicitud.eliminar()
         println("Eliminando solicitud " + solicitud.titulo + " de la fundacion " + nombre)
     }
 
@@ -82,7 +91,7 @@ class Fundacion(
 
     fun verNotificaciones(): MutableList<Notificacion?> {
         println("Notificaciones de fundacion " + nombre)
-        return ArrayList<Notificacion?>()
+        return sistema?.notificaciones?.filter { it.receptorFundacion === this }?.toMutableList() ?: mutableListOf()
     }
 
     fun responderMensaje(mensaje: Mensaje?, respuesta: String?): Mensaje? {

@@ -2,7 +2,7 @@ package com.example.fundfind.logic
 
 import java.util.Date
 
-class Retroalimentacion {
+class Retroalimentacion : java.io.Serializable {
     var idRetroalimentacion: Int = 0
     var calificacion: Int = 0
     var comentario: String? = null

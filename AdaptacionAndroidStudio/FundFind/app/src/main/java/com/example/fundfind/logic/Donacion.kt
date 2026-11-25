@@ -11,7 +11,11 @@ class Donacion(// Getters y setters
     var comprobante: String?,
     var usuario: UsuarioDonador,
     var solicitud: Solicitud?
-) {
+) : java.io.Serializable {
+    var cantidadDescripcion: String = ""
+    var nombreContacto: String = ""
+    var contacto: String = ""
+    var deseaComprobante: Boolean = true
     // Métodos
     fun registrarIntencion() {
         this.estado = "INTENCIONREGISTRADA" //Se cambia el estado a esto

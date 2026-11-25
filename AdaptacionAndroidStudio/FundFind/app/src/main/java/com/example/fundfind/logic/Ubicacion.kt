@@ -5,7 +5,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-class Ubicacion {
+class Ubicacion : java.io.Serializable {
     // Getters y setters
     var latitud: Double = 0.0
     var longitud: Double = 0.0

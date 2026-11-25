@@ -2,7 +2,7 @@ package com.example.fundfind.logic
 
 import java.util.Date
 
-class Notificacion {
+class Notificacion : java.io.Serializable {
     // Getters y setters
     var idNotificacion: Int = 0
     var mensaje: String? = null
