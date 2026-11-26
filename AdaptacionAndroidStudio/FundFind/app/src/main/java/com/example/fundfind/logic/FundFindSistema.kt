@@ -4,103 +4,105 @@ import java.util.Date
 import java.util.ArrayList
 
 class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
-    // getters
-    // Esta clase guarda todos los usuarios, fundaciones y las solicitudes
-    val usuarios: MutableList<UsuarioDonador> = ArrayList<UsuarioDonador>()
+    val usuarios: MutableList<UsuarioDonador> = ArrayList()
+    val fundaciones: MutableList<Fundacion> = ArrayList()
+    val solicitudes: MutableList<Solicitud> = ArrayList()
+    val mensajes: MutableList<Mensaje> = ArrayList()
+    val retroalimentaciones: MutableList<Retroalimentacion> = ArrayList()
+    val donaciones: MutableList<Donacion> = arrayListOf()
+    val notificaciones: MutableList<Notificacion> = arrayListOf()
 
-    // se muestran las fundaciones cuando utilizamos el combobox
-    val fundaciones: MutableList<Fundacion> = ArrayList<Fundacion>()
-    val solicitudes: MutableList<Solicitud> = ArrayList<Solicitud>()
-    val mensajes: MutableList<Mensaje> = ArrayList<Mensaje>()
-    val retroalimentaciones: MutableList<Retroalimentacion> = ArrayList<Retroalimentacion>()
+    companion object {
+        val CATEGORIAS_GENERALES = listOf(
+            "Dinero",
+            "Alimentos y despensas",
+            "Ropa y abrigo",
+            "Salud y medicamentos",
+            "Educación y útiles",
+            "Higiene personal",
+            "Voluntariado",
+            "Otro"
+        )
+    }
 
-    init { // Constructor
+    init {
         if (cargarIniciales) cargarDatosIniciales()
         vincularModelos()
     }
 
     val solicitudesActivas: MutableList<Solicitud?>
-        get() {
-            val activas: MutableList<Solicitud?> = ArrayList<Solicitud?>()
-            for (i in solicitudes.indices) {
-                val s = solicitudes.get(i)
-                if (s.activa()) {
-                    activas.add(s)
-                }
-            }
-            return activas
-        }
+        get() = solicitudes.filter { it.activa() }.toMutableList()
 
-    fun getSolicitudesDeFundacion(f: Fundacion?): MutableList<Solicitud?> {
-        val res: MutableList<Solicitud?> = ArrayList<Solicitud?>()
-        for (i in solicitudes.indices) {
-            val s = solicitudes.get(i)
-            if (s.fundacion === f) {
-                res.add(s)
-            }
+    fun getSolicitudesDeFundacion(f: Fundacion?): MutableList<Solicitud?> =
+        solicitudes.filter { it.fundacion === f }.toMutableList()
+
+    fun getMensajesParaFundacion(f: Fundacion?): MutableList<Mensaje?> =
+        mensajes.filter { it.destinatarioFundacion === f }.toMutableList()
+
+    fun getRetroalimentacionesParaFundacion(f: Fundacion?): MutableList<Retroalimentacion?> =
+        retroalimentaciones.filter { it.fundacion === f }.toMutableList()
+
+    fun loginDonador(correo: String?, contrasena: String?): UsuarioDonador? =
+        usuarios.firstOrNull { it.login(correo, contrasena) }
+
+    fun loginFundacion(correoContacto: String?, claveORfc: String?): Fundacion? {
+        if (correoContacto.isNullOrBlank() || claveORfc.isNullOrBlank()) return null
+        return fundaciones.firstOrNull { f ->
+            val correoOk = f.correoContacto.equals(correoContacto.trim(), ignoreCase = true)
+            val rfcOk = !f.rfc.isNullOrBlank() && f.rfc.equals(claveORfc.trim(), ignoreCase = true)
+            val claveOk = f.claveAcceso.isNotBlank() && Credenciales.coincide(claveORfc, f.claveAcceso)
+            correoOk && (rfcOk || claveOk) && f.estadoCuenta == "ACTIVA"
         }
-        return res
     }
 
-    fun getMensajesParaFundacion(f: Fundacion?): MutableList<Mensaje?> {
-        val res: MutableList<Mensaje?> = ArrayList<Mensaje?>()
-        for (i in mensajes.indices) {
-            val m = mensajes.get(i)
-            if (m.destinatarioFundacion === f) {
-                res.add(m)
-            }
+    fun registrarFundacion(
+        nombre: String,
+        rfc: String,
+        correo: String,
+        clave: String,
+        telefono: String,
+        direccion: String,
+        categoria: String,
+        mision: String
+    ): Fundacion {
+        require(nombre.isNotBlank() && direccion.isNotBlank() && categoria.isNotBlank()) {
+            "Completa el nombre, dirección y categoría de la fundación."
         }
-        return res
+        require(rfc.trim().length in 12..13) { "Introduce un RFC válido (12 o 13 caracteres)." }
+        require(correo.matches(Regex("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))) { "Introduce un correo válido." }
+        require(clave.length >= 8) { "La contraseña debe tener al menos 8 caracteres." }
+        require(telefono.count { it.isDigit() } >= 7) { "Introduce un teléfono válido." }
+        require(fundaciones.none { it.correoContacto.equals(correo.trim(), true) }) { "Este correo ya está registrado." }
+        require(usuarios.none { it.correo.equals(correo.trim(), true) }) { "Este correo ya está en uso por un donador." }
+
+        val nueva = Fundacion(
+            idFundacion = (fundaciones.maxOfOrNull { it.idFundacion } ?: 0) + 1,
+            nombre = nombre.trim(),
+            rfc = rfc.trim().uppercase(),
+            direccion = direccion.trim(),
+            categoria = categoria.trim(),
+            correoContacto = correo.trim(),
+            telefonoContacto = telefono.trim(),
+            documentacionLegal = "Acta constitutiva y constancia RFC en revisión",
+            isVerificado = true,
+            estadoCuenta = "ACTIVA",
+            fechaRegistro = Date()
+        ).apply {
+            this.claveAcceso = Credenciales.crear(clave)
+            this.descripcionMision = mision.ifBlank { "Organización comprometida con el bienestar comunitario en ${direccion.trim()}." }
+            this.latitud = 20.6736 + (fundaciones.size * 0.012)
+            this.longitud = -103.344 - (fundaciones.size * 0.010)
+            this.estiloBanner = (fundaciones.size % 3) + 1
+            this.sistema = this@FundFindSistema
+        }
+        fundaciones.add(nueva)
+        return nueva
     }
 
-    fun getRetroalimentacionesParaFundacion(f: Fundacion?): MutableList<Retroalimentacion?> {
-        val res: MutableList<Retroalimentacion?> = ArrayList<Retroalimentacion?>()
-        for (i in retroalimentaciones.indices) {
-            val r: Retroalimentacion = retroalimentaciones.get(i)
-            // SE CORRIGIÓ: getFundacion() -> fundacion
-            if (r.fundacion === f) {
-                res.add(r)
-            }
-        }
-        return res
-    }
-
-    // los logins
-    fun loginDonador(correo: String?, contrasena: String?): UsuarioDonador? {
-        for (i in usuarios.indices) {
-            val u = usuarios.get(i)
-            if (u.login(correo, contrasena)) {
-                return u
-            }
-        }
-        return null
-    }
-
-    fun loginFundacion(correoContacto: String?, rfc: String?): Fundacion? {
-        for (i in fundaciones.indices) {
-            val f = fundaciones.get(i)
-            val correoOk = f.correoContacto == correoContacto
-            val rfcOk = f.rfc == rfc
-            val activa = "ACTIVA" == f.estadoCuenta
-            if (correoOk && rfcOk && activa) {
-                return f
-            }
-        }
-        return null
-    }
-
-    // acciones del donador
-    fun enviarMensaje(
-        usuario: UsuarioDonador?,
-        fundacion: Fundacion?,
-        texto: String?
-    ): Mensaje? { // cambiado tipo de retorno si fuera necesario, se mantiene Mensaje
-        if (usuario == null || fundacion == null) {
-            return null
-        }
+    fun enviarMensaje(usuario: UsuarioDonador?, fundacion: Fundacion?, texto: String?): Mensaje? {
+        if (usuario == null || fundacion == null) return null
         require(!texto.isNullOrBlank()) { "Escribe un mensaje." }
-        val m = usuario.enviarMensaje(fundacion, texto)
-        requireNotNull(m)
+        val m = requireNotNull(usuario.enviarMensaje(fundacion, texto))
         m.idMensaje = (mensajes.maxOfOrNull { it.idMensaje } ?: 0) + 1
         m.enviar()
         mensajes.add(m)
@@ -114,11 +116,8 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
         calificacion: Int,
         comentario: String?
     ): Retroalimentacion? {
-        if (usuario == null || fundacion == null) {
-            return null
-        }
-        // SE CORRIGIÓ: Manejo correcto de asignación no nula (!!) tras validar que no sea null
-        val r: Retroalimentacion? = usuario.dejarRetroalimentacion(fundacion, null, calificacion, comentario)
+        if (usuario == null || fundacion == null) return null
+        val r = usuario.dejarRetroalimentacion(fundacion, null, calificacion, comentario)
         if (r != null) {
             r.idRetroalimentacion = (retroalimentaciones.maxOfOrNull { it.idRetroalimentacion } ?: 0) + 1
             r.registrar()
@@ -127,40 +126,32 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
         return r
     }
 
-    // acciones de la fundacion
     fun publicarSolicitud(
         fundacion: Fundacion?,
         titulo: String?,
         descripcion: String?,
-        tipoDonacion: String?,
-        causaSocial: String?
+        categoriaGeneral: String?,
+        causaSocial: String? = categoriaGeneral
     ): Solicitud? {
-        if (fundacion == null) {
-            return null
+        if (fundacion == null) return null
+        require(!titulo.isNullOrBlank() && !descripcion.isNullOrBlank() && !categoriaGeneral.isNullOrBlank()) {
+            "Completa los datos de la solicitud."
         }
-
-        require(!titulo.isNullOrBlank() && !descripcion.isNullOrBlank() && !tipoDonacion.isNullOrBlank() && !causaSocial.isNullOrBlank()) { "Completa los datos de la solicitud." }
         val nuevoId = (solicitudes.maxOfOrNull { it.idSolicitud } ?: 0) + 1
-
         val s = Solicitud(
             nuevoId,
             titulo,
             descripcion,
-            tipoDonacion,
-            causaSocial,
+            categoriaGeneral,
+            causaSocial ?: categoriaGeneral,
             "BORRADOR",
             null,
             fundacion
         )
-
         fundacion.publicarSolicitud(s)
         solicitudes.add(s)
-
         return s
     }
-
-    val donaciones: MutableList<Donacion> = arrayListOf()
-    val notificaciones: MutableList<Notificacion> = arrayListOf()
 
     fun vincularModelos() {
         usuarios.forEach { it.sistema = this }
@@ -172,21 +163,58 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
         require(correo.matches(Regex("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))) { "Introduce un correo válido." }
         require(clave.length >= 8) { "La contraseña debe tener al menos 8 caracteres." }
         require(usuarios.none { it.correo.equals(correo.trim(), true) }) { "Este correo ya está registrado." }
-        return UsuarioDonador((usuarios.maxOfOrNull { it.idUsuario } ?: 0) + 1, nombre.trim(), correo.trim(),
-            Credenciales.crear(clave), ubicacion.trim(), 4.579, -74.216, arrayListOf(), "ACTIVA", Date()).also {
+        require(fundaciones.none { it.correoContacto.equals(correo.trim(), true) }) { "Este correo pertenece a una fundación." }
+        return UsuarioDonador(
+            (usuarios.maxOfOrNull { it.idUsuario } ?: 0) + 1,
+            nombre.trim(),
+            correo.trim(),
+            Credenciales.crear(clave),
+            ubicacion.trim(),
+            20.6736,
+            -103.344,
+            arrayListOf(),
+            "ACTIVA",
+            Date()
+        ).also {
             it.registrar(); it.sistema = this; usuarios.add(it)
         }
     }
 
-    fun registrarIntencion(usuario: UsuarioDonador, solicitud: Solicitud, tipo: String, cantidad: String,
-                           nombre: String, contacto: String, comprobante: Boolean): Donacion {
+    fun registrarIntencion(
+        usuario: UsuarioDonador,
+        solicitud: Solicitud,
+        tipo: String,
+        cantidad: String,
+        nombre: String,
+        contacto: String,
+        comprobante: Boolean,
+        montoNumerico: Double = 0.0
+    ): Donacion {
         require(usuarios.contains(usuario) && solicitudes.contains(solicitud)) { "La cuenta o solicitud no pertenece a esta sesión." }
         require(usuario.estadoCuenta == "ACTIVA" && solicitud.activa()) { "Esta solicitud ya no está disponible." }
         require(tipo.isNotBlank() && cantidad.isNotBlank() && nombre.isNotBlank()) { "Completa todos los campos." }
+        if (tipo.equals("Dinero", ignoreCase = true)) {
+            require(montoNumerico > 0.0) { "Ingresa un monto económico mayor a $0." }
+        }
         require(contacto.contains('@') || contacto.count { it.isDigit() } >= 7) { "Introduce un teléfono o correo válido." }
-        return Donacion((donaciones.maxOfOrNull { it.idDonacion } ?: 0) + 1, Date(), 0.0, tipo, null, null, usuario, solicitud).also {
-            it.cantidadDescripcion = cantidad.trim(); it.nombreContacto = nombre.trim(); it.contacto = contacto.trim()
-            it.deseaComprobante = comprobante; it.registrarIntencion(); it.generarComprobante(); donaciones.add(it)
+
+        return Donacion(
+            (donaciones.maxOfOrNull { it.idDonacion } ?: 0) + 1,
+            Date(),
+            montoNumerico,
+            tipo,
+            null,
+            null,
+            usuario,
+            solicitud
+        ).also {
+            it.cantidadDescripcion = if (tipo.equals("Dinero", true)) "$${"%.2f".format(montoNumerico)} MXN" else cantidad.trim()
+            it.nombreContacto = nombre.trim()
+            it.contacto = contacto.trim()
+            it.deseaComprobante = comprobante
+            it.registrarIntencion()
+            it.generarComprobante()
+            donaciones.add(it)
             notificar("Registraste tu intención: ${solicitud.titulo}", usuario, null, "DONACION", it.idDonacion.toString())
             notificar("${usuario.nombre} quiere ayudar: ${solicitud.titulo}", null, solicitud.fundacion, "DONACION", it.idDonacion.toString())
         }
@@ -202,8 +230,12 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
     }
 
     fun notificar(texto: String, usuario: UsuarioDonador?, fundacion: Fundacion?, tipo: String, recurso: String) {
-        notificaciones.add(Notificacion((notificaciones.maxOfOrNull { it.idNotificacion } ?: 0) + 1,
-            texto, tipo, Date(), false, usuario, fundacion, recurso).also { it.enviar() })
+        notificaciones.add(
+            Notificacion(
+                (notificaciones.maxOfOrNull { it.idNotificacion } ?: 0) + 1,
+                texto, tipo, Date(), false, usuario, fundacion, recurso
+            ).also { it.enviar() }
+        )
     }
 
     fun cambiarDonacion(donacion: Donacion, estado: String) {
@@ -214,8 +246,7 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
             "CANCELADA" -> donacion.cancelar()
             else -> error("Estado no válido")
         }
-        notificar("Intención ${estado.lowercase()}: ${donacion.solicitud?.titulo}", donacion.usuario,
-            null, "DONACION", donacion.idDonacion.toString())
+        notificar("Intención ${estado.lowercase()}: ${donacion.solicitud?.titulo}", donacion.usuario, null, "DONACION", donacion.idDonacion.toString())
     }
 
     fun verificar(fundacion: Fundacion, aprobada: Boolean, responsable: String) {
@@ -228,104 +259,51 @@ class FundFindSistema(cargarIniciales: Boolean = true) : java.io.Serializable {
 
     fun moderar(solicitud: Solicitud, aprobar: Boolean) {
         require(solicitudes.contains(solicitud))
-        if (aprobar) { solicitud.reportes = 0; solicitud.motivoReporte = ""; solicitud.publicar() }
-        else solicitud.eliminar()
+        if (aprobar) {
+            solicitud.reportes = 0; solicitud.motivoReporte = ""; solicitud.publicar()
+        } else solicitud.eliminar()
         notificar(if (aprobar) "Publicación aprobada" else "Publicación retirada", null, solicitud.fundacion, "SOLICITUD", solicitud.idSolicitud.toString())
     }
 
     private fun cargarDatosIniciales() {
-        val intereses1: MutableList<String?> = ArrayList<String?>()
-        intereses1.add("Viveres")
-
-        val u1 = UsuarioDonador(
-            1,
-            "Camila",
-            "camijal06@gmail.com",
-            "12345678",
-            "Guadalajara, Jalisco",
-            20.67,
-            -103.35,
-            intereses1,
-            "ACTIVA",
-            Date()
+        usuarios.add(
+            UsuarioDonador(1, "Camila", "camijal06@gmail.com", "12345678", "Guadalajara, Jalisco",
+                20.6736, -103.344, arrayListOf("Alimentos y despensas"), "ACTIVA", Date())
         )
-        usuarios.add(u1)
-
-        val intereses2: MutableList<String?> = ArrayList<String?>()
-        intereses2.add("Ropa")
-
-        val u2 = UsuarioDonador(
-            2,
-            "Carlos",
-            "carlosserna@gmail.com",
-            "abcdef",
-            "Zapopan, JAL",
-            20.70,
-            -103.40,
-            intereses2,
-            "ACTIVA",
-            Date()
+        usuarios.add(
+            UsuarioDonador(2, "Carlos", "carlosserna@gmail.com", "abcdef12", "Zapopan, Jalisco",
+                20.7214, -103.3918, arrayListOf("Ropa y abrigo"), "ACTIVA", Date())
         )
-        usuarios.add(u2)
-
-        val u3 = UsuarioDonador(
-            3,
-            "utest",
-            "utest",
-            "1234",
-            "ddd, ddd",
-            20.70,
-            -103.40,
-            intereses2,
-            "ACTIVA",
-            Date()
-        )
-        usuarios.add(u3)
 
         val f1 = Fundacion(
-            1,
-            "Fundacion Sonrisas",
-            "FSR010101ABC",
-            "Guadalajara, JAL",
-            "Niños",
-            "contacto@sonrisas.org",
-            "3330000000",
-            "Acta Constitutiva",
-            true,
-            "ACTIVA",
-            Date()
-        )
+            1, "Fundación Sonrisas Jalisco", "FSR010101ABC",
+            "Av. Vallarta 2450, Col. Arcos Vallarta, Guadalajara, JAL",
+            "Alimentos y despensas", "contacto@sonrisas.org", "3330001122",
+            "Acta Constitutiva #4821 · Donataria Autorizada SAT", true, "ACTIVA", Date()
+        ).apply {
+            latitud = 20.6744; longitud = -103.3872
+            descripcionMision = "Brindamos comedores comunitarios, despensas semanales y acompañamiento educativo a más de 300 niñas y niños en Guadalajara."
+            horarioAtencion = "Lunes a Sábado · 8:30 AM - 6:00 PM"
+            sitioWeb = "www.fundacionsonrisas.org.mx"
+            referenciasUbicacion = "A 2 cuadras de la Glorieta Minerva, portón verde."
+            estiloBanner = 1
+        }
 
         val f2 = Fundacion(
-            2,
-            "Fundacion Patitas",
-            "PAT020202DEF",
-            "Zapopan, JAL",
-            "Animales",
-            "info@patitas.org",
-            "3331111111",
-            "Documento Legal",
-            true,
-            "ACTIVA",
-            Date()
-        )
-
-        val f3 = Fundacion(
-            3,
-            "testf",
-            "12345",
-            "aaaa",
-            "aaa",
-            "testf",
-            "aaaa",
-            "aaa",
-            true,
-            "ACTIVA",
-            Date()
-        )
+            2, "Fundación Patitas Seguras", "PAT020202DEF",
+            "Av. Patria 1820, Col. Jacarandas, Zapopan, JAL",
+            "Dinero", "info@patitas.org", "3331112233",
+            "Registro Estatal OSC #9102 · Acta Notarial Vigente", true, "ACTIVA", Date()
+        ).apply {
+            latitud = 20.7089; longitud = -103.4125
+            descripcionMision = "Rescate, rehabilitación veterinaria y adopción responsable de animales en situación de calle en la Zona Metropolitana."
+            horarioAtencion = "Martes a Domingo · 10:00 AM - 5:00 PM"
+            sitioWeb = "www.patitasseguras.org"
+            referenciasUbicacion = "Frente al Parque Metropolitano, acceso sur."
+            estiloBanner = 3
+        }
 
         fundaciones.add(f1)
         fundaciones.add(f2)
-        fundaciones.add(f3)
     }
 }
